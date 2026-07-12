@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OLS Control — Sign in</title><link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <div class="brand-mark">LS</div>
+    <p class="eyebrow">OpenLiteSpeed</p><h1>Control center</h1>
+    <p class="muted">Manage your existing Docker environment.</p>
+    <form method="post" action="/login">
+      <label>Dashboard password<input name="password" type="password" autocomplete="current-password" required autofocus></label>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      <button class="primary" type="submit">Sign in</button>
+    </form>
+  </main>
+</body></html>
+

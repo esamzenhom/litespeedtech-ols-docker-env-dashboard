@@ -1,0 +1,22 @@
+services:
+  dashboard:
+    build: .
+    image: ols-control-dashboard:local
+    container_name: ols-control-dashboard
+    restart: unless-stopped
+    ports:
+      - "${DASHBOARD_PORT:-8090}:8080"
+    environment:
+      DASHBOARD_PASSWORD: "${DASHBOARD_PASSWORD:?Set DASHBOARD_PASSWORD in .env}"
+      SECRET_KEY: "${SECRET_KEY:?Set SECRET_KEY in .env}"
+      OLS_CONTAINER: "${OLS_CONTAINER:-}"
+      MYSQL_CONTAINER: "${MYSQL_CONTAINER:-}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dashboard_data:/data
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  dashboard_data:
+

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf }}"><title>OLS Control</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">LS</div><div><b>OLS Control</b><small>Docker dashboard</small></div></div>
+    <nav>
+      <button class="nav active" data-page="overview">Overview</button>
+      <button class="nav" data-page="domains">Domains</button>
+      <button class="nav" data-page="databases">Databases</button>
+      <button class="nav" data-page="applications">Applications</button>
+      <button class="nav" data-page="certificates">Certificates</button>
+      <button class="nav" data-page="server">Server</button>
+      <button class="nav" data-page="activity">Activity</button>
+    </nav>
+    <form method="post" action="/logout"><button class="signout">Sign out</button></form>
+  </aside>
+  <main class="content">
+    <header><div><p class="eyebrow">Infrastructure</p><h1 id="title">Overview</h1></div><button class="ghost" id="refresh">↻ Refresh</button></header>
+
+    <section class="page active" id="overview">
+      <div class="status-grid">
+        <article class="status-card"><span class="dot" id="ols-dot"></span><div><small>Web server</small><h3 id="ols-name">Detecting…</h3><p id="ols-image" class="muted">OpenLiteSpeed</p></div></article>
+        <article class="status-card"><span class="dot" id="mysql-dot"></span><div><small>Database</small><h3 id="mysql-name">Detecting…</h3><p id="mysql-image" class="muted">MariaDB / MySQL</p></div></article>
+      </div>
+      <div class="panel hero"><div><p class="eyebrow">Quick action</p><h2>Keep the server responsive</h2><p class="muted">Gracefully restart OpenLiteSpeed after configuration changes.</p></div><button class="primary action" data-action="restart">Restart OLS</button></div>
+      <div class="panel"><h2>Recent activity</h2><div id="recent-jobs" class="job-list empty">No actions in this dashboard session.</div></div>
+    </section>
+
+    <section class="page" id="domains"><div class="section-head"><div><h2>Virtual hosts</h2><p class="muted">Add or remove OLS listeners and document roots.</p></div></div><div class="panel inventory-panel"><div class="inventory-title"><h3>Existing domains</h3><span class="count" id="domains-count">0</span></div><div id="domains-list" class="inventory-list empty">Loading…</div></div><div class="cards two">
+      <form class="panel action-form" data-action="domain_add"><h3>Add domain</h3><label>Root domain<input name="domain" placeholder="example.com" required></label><button class="primary">Add domain</button></form>
+      <form class="panel action-form danger-zone" data-action="domain_delete" data-confirm="Remove this domain from the OLS configuration?"><h3>Remove domain</h3><label>Root domain<input name="domain" placeholder="example.com" required></label><button class="danger">Remove domain</button></form>
+    </div></section>
+
+    <section class="page" id="databases"><div class="section-head"><div><h2>Databases</h2><p class="muted">Create credentials and optionally attach them to a domain for WordPress.</p></div></div><div class="panel inventory-panel"><div class="inventory-title"><h3>Existing databases</h3><span class="count" id="databases-count">0</span></div><div id="databases-list" class="inventory-list empty">Loading…</div></div><div class="cards two">
+      <form class="panel action-form" data-action="database_create"><h3>Create database</h3><label>Domain (optional)<input name="domain" placeholder="example.com"></label><label>Database<input name="database" required></label><label>Username<input name="username" required></label><label>Password <small>(leave empty to generate)</small><input name="password" type="password"></label><button class="primary">Create database</button></form>
+      <form class="panel action-form danger-zone" data-action="database_delete" data-confirm="Permanently delete this database and user?"><h3>Delete database</h3><label>Database<input name="database" required></label><label>Username <small>(defaults to database name)</small><input name="username"></label><button class="danger">Delete permanently</button></form>
+    </div></section>
+
+    <section class="page" id="applications"><div class="section-head"><div><h2>Applications</h2><p class="muted">Install WordPress or provision a complete demo site.</p></div></div><div class="panel inventory-panel"><div class="inventory-title"><h3>Detected applications</h3><span class="count" id="applications-count">0</span></div><div id="applications-list" class="inventory-list empty">Loading…</div></div><div class="cards two">
+      <form class="panel action-form" data-action="wordpress"><h3>Install WordPress</h3><p class="muted">The domain and its <code>.db_pass</code> credentials must already exist.</p><label>Domain<input name="domain" required></label><button class="primary">Install WordPress</button></form>
+      <form class="panel action-form" data-action="demo_site"><h3>Provision complete site</h3><label>Domain<input name="domain" required></label><label>Database<input name="database" required></label><label>Username<input name="username" required></label><label>Password<input name="password" type="password" placeholder="Leave empty to generate"></label><button class="primary">Create domain + DB + WordPress</button></form>
+    </div></section>
+
+    <section class="page" id="certificates"><div class="section-head"><div><h2>Certificates</h2><p class="muted">Manage Let's Encrypt and local development TLS.</p></div></div><div class="panel inventory-panel"><div class="inventory-title"><h3>Existing certificates</h3><span class="count" id="certificates-count">0</span></div><div id="certificates-list" class="inventory-list empty">Loading…</div></div><div class="cards two">
+      <form class="panel" id="auto-renew-form"><h3>Automatic renewal</h3><p class="muted">Periodically run ACME renewal for every configured certificate.</p><label class="check"><input id="auto-renew-enabled" name="auto_renew" type="checkbox"> Enable automatic renewal</label><label>Check interval<select id="renew-interval" name="renew_interval_days"><option value="1">Every day</option><option value="3">Every 3 days</option><option value="7">Every 7 days</option><option value="14">Every 14 days</option><option value="30">Every 30 days</option></select></label><p class="muted" id="last-auto-renew">Last automatic run: never</p><button class="primary">Save schedule</button></form>
+      <form class="panel action-form" data-action="acme_install"><h3>Install ACME client</h3><label>Account email<input name="email" type="email" required></label><button class="primary">Install ACME</button></form>
+      <div class="panel danger-zone"><h3>Uninstall ACME client</h3><p class="muted">Remove the ACME client from the OpenLiteSpeed container.</p><button class="danger action" data-action="acme_uninstall" data-confirm="Uninstall the ACME client? Existing certificate files are not automatically deleted.">Uninstall ACME</button></div>
+      <form class="panel action-form" data-action="acme_issue"><h3>Issue Let's Encrypt certificate</h3><label>Domain<input name="domain" required></label><label class="check"><input name="force" type="checkbox"> Force issuance</label><button class="primary">Issue certificate</button></form>
+      <form class="panel action-form" data-action="acme_renew"><h3>Renew one certificate</h3><label>Domain<input name="domain" required></label><label class="check"><input name="force" type="checkbox"> Force renewal</label><button>Renew</button></form>
+      <div class="panel"><h3>All certificates</h3><p class="muted">Run the ACME renewal check for every configured domain.</p><button class="action" data-action="acme_renew_all">Renew all</button></div>
+      <form class="panel action-form danger-zone" data-action="acme_revoke" data-confirm="Revoke this certificate with the certificate authority?"><h3>Revoke certificate</h3><label>Domain<input name="domain" required></label><button class="danger">Revoke</button></form>
+      <form class="panel action-form danger-zone" data-action="acme_remove" data-confirm="Remove this certificate from the ACME client?"><h3>Remove from ACME</h3><label>Domain<input name="domain" required></label><button class="danger">Remove</button></form>
+      <form class="panel action-form" data-action="local_cert"><h3>Local development TLS</h3><p class="muted">Generate a certificate signed by this dashboard's private local CA.</p><label>Domain<input name="domain" placeholder="project.test" required></label><button class="primary">Generate & configure</button><a class="download" href="/api/local-ca.pem">Download local CA</a></form>
+      <form class="panel action-form danger-zone" data-action="local_cert_remove" data-confirm="Remove local TLS from this domain?"><h3>Remove local TLS</h3><label>Domain<input name="domain" required></label><button class="danger">Remove local certificate</button></form>
+    </div></section>
+
+    <section class="page" id="server"><div class="section-head"><div><h2>Server</h2><p class="muted">Administrative controls for the detected LiteSpeed container.</p></div></div><div class="cards two">
+      <form class="panel action-form" data-action="webadmin_password"><h3>WebAdmin password</h3><label>New password<input name="password" type="password" minlength="12" required></label><button class="primary">Update password</button></form>
+      <div class="panel"><h3>ModSecurity + OWASP CRS</h3><p class="muted">Enabling downloads and configures the OWASP ruleset.</p><div class="button-row"><button class="action" data-action="modsecurity" data-params='{"mode":"enable"}'>Enable</button><button class="action" data-action="modsecurity" data-params='{"mode":"disable"}'>Disable</button></div></div>
+      <div class="panel danger-zone"><h3>Upgrade LiteSpeed</h3><p class="muted">Run the vendor upgrade script inside the server container.</p><button class="danger action" data-action="upgrade" data-confirm="Upgrade the running LiteSpeed server now?">Run upgrade</button></div>
+      <form class="panel action-form" data-action="serial"><h3>Enterprise serial / trial</h3><label>Serial or TRIAL<input name="serial" required></label><button>Apply serial</button></form>
+    </div></section>
+
+    <section class="page" id="activity"><div class="section-head"><div><h2>Activity</h2><p class="muted">Command outcomes for this dashboard process.</p></div></div><div class="panel"><div id="all-jobs" class="job-list empty">No activity yet.</div></div></section>
+  </main>
+  <div class="toast" id="toast"></div>
+  <dialog id="result-dialog"><div class="dialog-head"><h3>Action result</h3><button id="close-dialog">×</button></div><pre id="result-output"></pre></dialog>
+  <script src="/static/app.js"></script>
+</body></html>
