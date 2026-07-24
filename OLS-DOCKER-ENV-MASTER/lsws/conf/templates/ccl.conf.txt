@@ -1,0 +1,86 @@
+restrained 1
+configfile $SERVER_ROOT/conf/vhosts/$VH_NAME/vhconf.conf
+allowsymbollink 1
+enablescript 1
+vhroot $SERVER_ROOT/$VH_NAME/
+setuidmode 0
+chrootmode 0
+
+virtualhostconfig  {
+    enablegzip 1
+    docroot $VH_ROOT/html/
+
+    expires  {
+        expiresdefault 
+        enableexpires 1
+    }
+
+    general  {
+        enablecontextac 0
+    }
+
+    accesslog $SERVER_ROOT/logs/$VH_NAME.access.log {
+        useserver 0
+        keepdays 30
+        rollingsize 100M
+        compressarchive 1
+        loguseragent 1
+        logreferer 1
+    }
+
+    errorlog  {
+        useserver 1
+    }
+
+    context /cgi-bin/ {
+        type cgi
+        location $VH_ROOT/cgi-bin/
+        allowbrowse 1
+    }
+
+    hotlinkctrl  {
+        allowdirectaccess 1
+        redirecturi 
+        onlyself 1
+        allowedhosts 
+        enablehotlinkctrl 0
+        suffixes gif, jpeg, jpg
+    }
+
+    rewrite  {
+        enable 0
+        loglevel 0
+    }
+
+    index  {
+        autoindexuri /_autoindex/default.php
+        useserver 0
+        autoindex 0
+        indexfiles index.html
+    }
+
+    accesscontrol  {
+        deny 
+        allow *
+    }
+
+    context / {
+        allowbrowse 1
+        location $DOC_ROOT/
+
+        rewrite  {
+            rules rewritefile .htaccess
+            unknownkeywords rewritefile .htaccess
+        }
+    }
+
+    awstats  {
+        sitedomain localhost
+        workingdir $VH_ROOT/awstats
+        awstatsuri /awstats/
+        updatemode 0
+        sitealiases 127.0.0.1 localhost
+        updateinterval 86400
+        updateoffset 0
+    }
+}
